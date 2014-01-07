@@ -1,0 +1,619 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+		<meta name="google-site-verification" content="UZnqGJ88mBL9GXe3IzKvFVrp6shl9wojFcBQ88admjk">
+    	<meta name="yandex-verification" content="4811b3afeb4eb3fe">
+    
+
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="expires" content="0">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+
+	<meta name="description" content="
+	Whirlpool хеш больше похож на алгоритм шифрования AES чем на хеши MD5 и SHA1. Он весьма запутан и реализовать его сложнее чем AES, да и работает он не очень быстро, зато для него пока не нашли коллизий. Здесь я собираюсь рассказать �...">
+
+	<meta name="keywords" content="var, whirlpool, —, return, for, чисел, матрицу, по, от, байт, на, блоков, хеш, ebox, из, rbox, строки, матрица, матрицы, xor, байтный, массив, число, сообщение, sbox, байтных, блок, whirlpoolgfmul, aes, поток">
+  
+
+	<meta name="Language" content="ru-ru">
+	<meta name="Robots" content="All">
+		
+  <style type="text/css" media="screen">
+   @import "/templates/mystique/css/style.css";
+   @import "/templates/mystique/css/style-green.css";
+  </style>
+
+  <!--[if lte IE 6]>
+  <link rel="stylesheet" type="text/css" href="/templates/mystique/css/ie6.css" media="screen" />
+  <![endif]-->
+  <!--[if IE 7]>
+  <link rel="stylesheet" type="text/css" href="/templates/mystique/css/ie7.css" media="screen" />
+  <![endif]-->
+
+  <script type="text/javascript" src="%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20_%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool%20_%20Gliffer_files/jquery.js"></script>
+
+    
+    <script src="%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20_%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool%20_%20Gliffer_files/spellChecker.js" type="text/javascript"></script>
+  
+
+    <title>Алгоритмы / Как устроен Whirlpool |  Gliffer</title>
+  
+  <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="http://gliffer.ru/rss.php">
+  <link rel="shortcut icon" type="image/x-icon" href="http://gliffer.ru/templates/mystique/images/favicon.ico">
+
+
+  </head>
+<body dir="ltr">
+	
+ <div id="page">
+  
+    <script type="text/javascript" language="JavaScript">
+    function checkForm() {
+    answer = true;
+    if (siw && siw.selectingSomething) answer = false;
+    return answer;
+    }//
+    </script>
+  
+
+  
+  
+<!-- header -->
+<div class="shadow-left page-content header-wrapper">
+ <div class="shadow-right">
+
+  <div id="header" class="bubbleTrigger">
+   <div id="site-title">
+    <div id="logo"><a href="http://gliffer.ru/">Gliffer</a></div>
+   </div>
+
+   <div class="user">
+          <a href="http://gliffer.ru/register/">Регистрация</a> | <a href="http://gliffer.ru/login.php?return=/articles/algoritmi--kak-ustroen-whirlpool/">Вход</a>   </div>
+
+      <a href="http://gliffer.ru/algoritmi--kak-ustroen-whirlpool/rss/" class="rss" title="RSS Feeds"><span>RSS Feeds</span></a>
+      <ul role="navigation" class="sf-js-enabled" id="navigation">
+		<li id="nav-home"><a class="home fadeThis" href="http://gliffer.ru/"><span class="title">Главная</span><span class="pointer"></span><span style="opacity: 0;" class="hover"></span></a></li>
+		<li><a class="fadeThis" href="http://gliffer.ru/news"><span class="title">Новости</span><span class="pointer"></span><span style="opacity: 0;" class="hover"></span></a></li>
+		<li class="active"><a class="fadeThis" href="http://gliffer.ru/articles"><span class="title">Статьи</span><span class="pointer"></span><span style="opacity: 0;" class="hover"></span></a></li>
+
+
+   </ul>
+  </div>
+ </div>
+</div>
+<!-- /header -->
+
+
+ <!-- left+right bottom shadow -->
+ <div class="shadow-left page-content main-wrapper">
+  <div class="shadow-right">
+
+  <!-- main content: primary + sidebar(s) -->
+  <div id="main">
+   <div id="main-inside" class="clearfix">
+    <a style="padding-right: 10px; padding-top: 10px; float: right;" href="http://vzxen.ru/" title="VZXEN - честный VPS хостинг на Xen Hypervisor">
+    <img src="%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20_%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool%20_%20Gliffer_files/vzxen.gif" alt="vzxen.ru">
+    </a>
+    <!-- primary content -->
+    <div role="main" id="primary-content">
+
+     	
+
+		
+		
+
+		
+		
+<div class="post" id="xnews-0">
+
+ <h2 class="title">
+            <a href="http://gliffer.ru/articles/algoritmi--kak-ustroen-whirlpool/">Алгоритмы / Как устроен Whirlpool</a>
+        </h2>
+
+ <div class="post-date">
+  <p> 909 дней назад</p>
+ </div>
+
+ <div class="post-info clearfix">
+  <div class="votes alignright">
+    <span class="votenumber" id="xvotes-0">0</span>
+
+	    <div class="vote-box" id="xvote-0">
+        	<a href="javascript:vote(0,332829,0,'2b89393c1d63f4070a822794202e5c8f',10)" class="vote up"><span>Голосовать</span></a>
+    	
+    	  <a id="xreport-0" href="javascript:vote(0,332829,0,'2b89393c1d63f4070a822794202e5c8f',-10)" class="vote down"><span>Против</span></a>
+    	    
+        </div>
+	
+
+	
+
+
+  </div>
+
+ </div>
+
+ <div class="post-content clearfix">
+    
+       
+	Whirlpool хеш больше похож на алгоритм шифрования AES чем на хеши MD5 и
+ SHA1. Он весьма запутан и реализовать его сложнее чем AES, да и 
+работает он не очень быстро, зато для него пока не нашли коллизий. Здесь
+ я собираюсь рассказать как по простому, без хитрых оптимизаций, 
+написать этот алгоритм.<br>
+<br>
+<a name="habracut"></a><br>
+<br>
+<h4>Конечные поля</h4><br>
+<br>
+Также как AES, Whirlpool производит все вычисления в конечных полях. Под
+ «конечным полем» здесь подразумеваются всего лишь операции • (умножить)
+ и + (сложить) определённые хитрым образом над парами целых чисел. Здесь
+ используют следующую идею. Будем считать, что число 0x17=1'0111 это 
+компактная запись многочлена у которого 1'0111 — коэффициенты: x<sup>4</sup>+x<sup>2</sup>+x+1.<br>
+<br>
+Для сложения двух чисел их записывают в виде многочленов и складывают 
+коэффициенты при соответсвующих степенях, при этом считая, что 
+коэффициенты это биты с двумя значениями и правилами сложения 1+0=1, 
+1+1=0 и т.д. Вообщем получается, что сложение двух чисел это xor.<br>
+<br>
+Умножение двух чисел берётся по модулю некоторого специально выбранного 
+многочлена, вид которого зависит от разрядности чисел. Whirlpool 
+оперирует полями GF(2<sup>4</sup>) (4-битные числа) и GF(2<sup>8</sup>) (8-битные числа). Для GF(2<sup>4</sup>) авторами Whirlpool было выбрано число 0x13=1'0011=x<sup>4</sup>+x+1. Найдём например произведение 0xb•0xb=1011•1011:<br>
+<br>
+1011•1011 = (x<sup>3</sup>+x+1)(x<sup>3</sup>+x+1) mod(x<sup>4</sup>+x+1)<br>
+<br>
+Вычислять это напрямую долго, однако видно, что это умножение сводится к умножению на простой многочлен x:<br>
+<br>
+1011•1011 = 1011•x<sup>3</sup>+1011•x+1011 = 1011•10•10•10+1011•10+1011<br>
+<br>
+Найдём правило умножения p•x. Если p•x не помещается в 4 бита, надо 
+отнять от p•x многочлен 0x13, иначе оставить p•x без изменений.<br>
+<br>
+<pre><code>1011•10 = 1'0110 - 1'0011 = 1'0110 ^ 1'0011 = 101
+1011•10•10 = 101•10 = 1010
+1011•10•10•10 = 1010•10 = 1'0100 - 1'0011 = 110
+</code></pre><br>
+<br>
+Теперь складываем три слагаемых:<br>
+<br>
+1011•10•10•10+1011•10+1011 = 110+101+1011 = 10+1011 = 1001 = 0x9<br>
+<br>
+Получилось, что 0xb•0xb=0x9. Правила умножения в GF(2<sup>8</sup>) такие же, только многочлен другой: 0x11d (в AES используется 0x11b).<br>
+<br>
+<pre><code class="javascript">whirlpool.gf4mul = function(a, b)
+{
+	var c = 0
+	
+	while (b != 0)
+	{
+		if (b &amp; 1)
+			c ^= a
+			
+		b = b &gt;&gt; 1
+		a = a &lt;&lt; 1
+
+		if (a &amp; 0x10)
+			a ^= 0x13
+	}
+	
+	return c
+}
+
+whirlpool.gf8mul = function(a, b)
+{
+	var c = 0
+	
+	while (b != 0)
+	{
+		if (b &amp; 1)
+			c ^= a
+					
+		b = b &gt;&gt; 1
+		a = a &lt;&lt; 1
+		
+		if (a &amp; 0x100)
+			a ^= 0x11d
+	}
+	
+	return c
+}
+</code></pre><br>
+<br>
+Чтобы умножить два числа нужно вызвать одну из этих функций, а чтобы сложить нужно просто применить xor.<br>
+<br>
+<h4>Выравнивание данных</h4><br>
+<br>
+Whirlpool — блочная хеш-функция. Это значит, что алгоритм обрабатывает 
+входное сообщение по блокам фиксированного размера — 32 байта. Сообщение
+ может быть любой длины, поэтому перед началом работы сообщение 
+выравнивается по таким правилам:<br>
+<br>
+<ol>
+<li>Дописывают в конец бит равный 1.</li>
+<li>Дописывают в конец нулевые биты так, чтобы длина сообщения 
+получилась кратной 32 байтам, при этом отношение длина/32 должно быть 
+нечётным.</li>
+<li>Дописывают в конец длину исходного сообщения.</li>
+</ol><br>
+<br>
+Рассмотрим это на примере строки «habrahabr»:<br>
+<br>
+<pre><code>68 61 62 72 61 68 61 62
+72 80 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 48
+</code></pre><br>
+<br>
+Первые 9 байт — ASCII коды букв из строки. Байт 0x80 это добавленный бит
+ «1». В конце записано число битов в исходном сообщении: 9×8=72=0x48. 
+После такого выравнивания сообщение выглядит как несколько 64-байтных 
+блоков.<br>
+<br>
+<h4>Вспомогательные функции Whirlpool</h4><br>
+<br>
+Алгоритм использует несколько простых вспомогательных функций, таких как E-Box, R-Box, S-Box.<br>
+<br>
+<ul>
+<li><b>R-Box</b> это просто массив из 16-ти 4-битных чисел. Он 
+сгенерирован так, чтобы иметь некоторые особые свойства. Для реализации 
+важно только то, что R-Box нельзя получить алгоритмически, потому что 
+авторы Whirlpool использовали для генерации R-Box функцию random. Вот 
+этот R-Box: <pre><code>[7, 12, 11, 13, 14, 4, 9, 15, 6, 3, 8, 10, 2, 5, 1, 0]</code></pre></li>
+<li><b>E-Box</b> получается так: E(n)=0xb<sup>n</sup>, E(0xf)=0. Вычисления ведутся в поле GF(2<sup>4</sup>) — т.е. особое умножение и сложение как xor. Функция Inv-E-Box это E<sup>-1</sup> — функция обратная к E-Box. Фактически E-Box это массив из 16-ти 4-битных чисел.<br>
+<br>
+<pre><code>whirlpool.ebox = function(i)
+{
+	var mul = whirlpool.gf4mul
+	var ebox = whirlpool.ebox
+
+	switch(i)
+	{
+		case 0:		return 1
+		case 0xf:	return 0
+		default:	return mul(ebox(i - 1), 0xb)
+	}	
+}
+
+whirlpool.invebox = function(i)
+{
+	for (var j = 0; j &lt; 16; j++)
+		if (whirlpool.ebox(j) == i)
+			return j
+}
+</code></pre></li>
+<li><b>S-Box</b> принимает аргумент в диапазоне 0x00..0xff и возвращает 
+число в том же диапазоне. Если считать, что b — один байт, а u, v — его 
+верхняя и нижняя 4-битные половины, то S(b) = S(u, v) = (E(E(u) + a), E<sup>-1</sup>(E<sup>-1</sup>(v) + a)) где a = R(E(u) + E<sup>-1</sup>(v)).<br>
+<br>
+<pre><code>whirlpool.sbox = function(i)
+{
+	var v = i &amp; 0xf
+	var u = i &gt;&gt; 4
+	
+	var e = whirlpool.ebox
+	var ie = whirlpool.invebox
+	
+	var a = whirlpool.rbox[e(u) ^ ie(v)]
+	var u = e(e(u) ^ a)
+	var v = ie(ie(v) ^ a)
+	
+	return (u &lt;&lt; 4) ^ v
+}
+</code></pre></li>
+</ul><br>
+<br>
+Whirlpool воспринимает 64-байтный блок как матрицу 8×8 — первые 8 байт 
+это первая строка матрицы, следующие 8 байт — вторая строка, и т.д. 
+Алгоритм умеет делать несколько преобразований этой матрицы:<br>
+<br>
+<ul>
+<li><b>rotate</b> вращает k-ый столбец на k байт вниз. Нумерация с нуля. Исходная матрица:<br>
+<br>
+<pre><code>00 01 02 03 04 05 06 07
+10 11 12 13 14 15 16 17
+20 21 22 23 24 25 26 27
+30 31 32 33 34 35 36 37
+40 41 42 43 44 45 46 47
+50 51 52 53 54 55 56 57
+60 61 62 63 64 65 66 67
+70 71 72 73 74 75 76 77
+</code></pre><br>
+<br>
+преобразованная матрица:<br>
+<br>
+<pre><code>00 71 62 53 44 35 26 17
+10 01 72 63 54 45 36 27
+20 11 02 73 64 55 46 37
+30 21 12 03 74 65 56 47
+40 31 22 13 04 75 66 57
+50 41 32 23 14 05 76 67
+60 51 42 33 24 15 06 77
+70 61 52 43 34 25 16 07
+</code></pre><br>
+</li>
+<li><b>diffuse</b> умножает матрицу на матрицу особой структуры построенной за счёт вращения одной строки. Вот пример этой особой матрицы:<br>
+<br>
+<pre><code>00 01 02 03 04 05 06 07
+07 00 01 02 03 04 05 06
+06 07 00 01 02 03 04 05
+05 06 07 00 01 02 03 04
+04 05 06 07 00 01 02 03
+03 04 05 06 07 00 01 02
+02 03 04 05 06 07 00 01
+01 02 03 04 05 06 07 00
+</code></pre><br>
+<br>
+Видно, что все строки получаются вращением первой строки. Whirlpool использует такую матрицу:<br>
+<br>
+<pre><code>01 01 04 01 08 05 02 09
+09 01 01 04 01 08 05 02
+02 09 01 01 04 01 08 05
+05 02 09 01 01 04 01 08
+08 05 02 09 01 01 04 01
+01 08 05 02 09 01 01 04
+04 01 08 05 02 09 01 01
+01 04 01 08 05 02 09 01
+</code></pre><br>
+<br>
+diffuse(a) = a•d где d — описанная матрица. Умножение ведётся в поле GF(2<sup>8</sup>).<br>
+<br>
+<pre><code>whirlpool.diffuserow	 = [1, 1, 4, 1, 8, 5, 2, 9]
+
+whirlpool.diffuse = function(a)
+{
+	var n = whirlpool.dim
+	var b = whirlpool.matrix(n, n, 0)
+
+	var mul = whirlpool.gf8mul
+	var row = whirlpool.diffuserow
+	
+	for (var i = 0; i &lt; n; i++)
+	for (var j = 0; j &lt; n; j++)
+	for (var k = 0; k &lt; n; k++)
+		b[i][j] ^= mul(a[i][k], row[(j - k + n) % n])
+		
+	return b
+}
+</code></pre></li>
+</ul><br>
+<br>
+<h4>Схема обработки блоков</h4><br>
+<br>
+Whirlpool хранит внутреннее состояние H — матрицу 8×8 байт. В самом 
+начале H=0. Когда приходит очередной 64-байтный блок B, Whirlpool его 
+шифрует с помощью H и получает W(H, B), после чего добавляет (операция 
+xor) к своему состоянию полученное значение и исходный блок: H = H + B +
+ W(H, B). Осталось разобраться с шифрованием W.<br>
+<br>
+Функция W(H, B) вычисляется по следующей схеме:<br>
+<br>
+<pre><code>W = H + B
+for m = 1..10 do
+	H = C(m) + diffuse(rotate(sbox(H)))
+	W = H + diffuse(rotate(sbox(W)))
+</code></pre><br>
+<br>
+где C<sub>m</sub> это матрица 8×8 у которой все элементы нули, кроме первой строчки, которая берётся из S-Box: C<sub>m</sub>[0..7]
+ = S-Box[8(m-1)..8m-1]. Преобразования diffuse и rotate уже описаны, в 
+sbox(A) просто применяет к каждому элементу матрицы функцию S-Box.<br>
+<br>
+Выражение A + diffuse(rotate(sbox(B))) удобно записать в виде отдельной функции:<br>
+<br>
+<pre><code>whirlpool.rfun = function(k, a)
+{
+	a = whirlpool.apply(a)
+	a = whirlpool.rotate(a)	
+	a = whirlpool.diffuse(a)
+	a = whirlpool.add(a, k)
+	
+	return a
+}
+</code></pre><br>
+<br>
+Вот реализация функции W(H, B):<br>
+<br>
+<pre><code>whirlpool.cipher = function(key, text)
+{
+	var n = whirlpool.dim
+	var w = whirlpool.add(key, text)
+	var rcon = whirlpool.matrix(n, n, 0)
+	
+	for (var r = 1; r &lt;= whirlpool.rounds; r++)
+	{
+		for (var i = 0; i &lt; n; i++)
+			rcon[0][i] = whirlpool.sbox(n*(r - 1) + i)
+		
+		key = whirlpool.rfun(rcon, key)
+		w = whirlpool.rfun(key, w)
+	}
+		
+	return w
+}
+</code></pre><br>
+<br>
+Осталось реализовать схему H = H + B + W(H, B):<br>
+<br>
+<pre><code>whirlpool.compressor.prototype.push = function(block)
+{	
+	var h = this.state
+	var m = whirlpool.input(block) // преобразовать массив в матрицу 8×8
+	var c = whirlpool.cipher(h, m)
+	
+	var n = whirlpool.dim
+	
+	for (var i = 0; i &lt; n; i++)
+	for (var j = 0; j &lt; n; j++)
+		h[i][j] ^= c[i][j] ^ m[i][j]
+}
+</code></pre><br>
+<br>
+После того как обработан последний 64-байтный блок, значение хеша 
+находится в внутреннем состоянии H — матрице 8×8. Осталось лишь записать
+ матрицу в виде массива и соединить байты в 64-байтный хеш.<br>
+<br>
+<h4>Самое главное</h4><br>
+<br>
+Whirlpool хеш от habrahabr равен<br>
+<br>
+<pre><code>d9d81b7f991a08b89f7cb899f3320564
+da5cff67fcb021980862c693caf9d1ef
+715f146aff6d92008544095d34451233
+ffd83a420f6cdbaff9d5ccdc92407d77
+</code></pre><br>
+<br>
+<h4>Пример</h4><br>
+<br>
+Несколько комментариев к реализации примера. На вход хеш-функции может 
+прийти как строка, так и массив их байтов. Также хочется иметь 
+возможность вычислять хеши от синтетических сообщений — например от 
+миллиона букв 'a'. Из за этой неоднородности входных данных я сделал 
+чтение данных трёхслойным:<br>
+<br>
+<ol>
+<li><b>reader</b> преобразует поток байтов в 32-байтные блоки. Он выравнивает сообщение и добавляет биты как сказано в описании Whirlpool.</li>
+<li><b>hub</b> преобразует поток 32-байтных блоков в поток 64-байтных блоков.</li>
+<li><b>compressor</b> принимает поток 64-байтных блоков и меняет состояние H по алгоритму Whirlpool.</li>
+</ol><br>
+<br>
+Такая схема, с одной стороны, позволяет вычислять хеш очевидным способом
+ whirlpool.hash('habrahabr'), а с другой стороны позволяет вычислить хеш
+ от синтетического сообщения (для тестирования): <br>
+<br>
+<pre><code>whirlpool.hash(function() { return 0x61 }, 1000000)
+</code></pre><br>
+<br>
+<h4>Исходники</h4><br>
+<br>
+Можно скачать <a href="http://dl.dropbox.com/u/18189361/whirlpool.zip">здесь</a>. Там два файла: html и js.
+
+	
+
+	
+
+	
+<br><div class="content_source">Источник: habrahabr.ru</div><br>                                                             
+    
+      
+ </div>
+
+ <div class="controls clearfix">
+
+
+  
+  
+   <!-- socialize -->
+   <div class="tool shareThis">
+    <a class="js-link block">Share this post!</a>
+    <ul class="bubble">
+     <a href="http://twitter.com/home?status=%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20/%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool+-+http://tinyurl.com/44uamn5" class="twitter" title="Tweet This!"><span>Twitter</span></a>
+     <a href="http://digg.com/submit?phase=2&amp;url=http://gliffer.ru/articles/algoritmi--kak-ustroen-whirlpool/&amp;title=%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20/%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool" class="digg" title="Digg this!"><span>Digg</span></a>
+     <a href="http://www.facebook.com/share.php?u=http://gliffer.ru/articles/algoritmi--kak-ustroen-whirlpool/&amp;t=%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20/%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool" class="facebook" title="Share this on Facebook"><span>Facebook</span></a>
+     <a href="http://del.icio.us/post?url=http://gliffer.ru/articles/algoritmi--kak-ustroen-whirlpool/&amp;title=%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20/%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool" class="delicious" title="Share this on del.icio.us"><span>Delicious</span></a>
+     <a href="http://www.stumbleupon.com/submit?url=http://gliffer.ru/articles/algoritmi--kak-ustroen-whirlpool/&amp;title=%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20/%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool" class="stumbleupon" title="Stumbled upon something good? Share it on StumbleUpon"><span>StumbleUpon</span></a>
+     <a href="http://www.google.com/bookmarks/mark?op=add&amp;bkmk=http://gliffer.ru/articles/algoritmi--kak-ustroen-whirlpool/&amp;title=%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20/%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool" class="google" title="Add this to Google Bookmarks"><span>Google Bookmarks</span></a>
+     <a href="http://www.linkedin.com/shareArticle?mini=true&amp;url=http://gliffer.ru/articles/algoritmi--kak-ustroen-whirlpool/&amp;title=%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20/%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool&amp;summary=&amp;source=Gliffer" class="linkedin" title="Share this on Linkedin"><span>LinkedIn</span></a>
+     <a href="http://technorati.com/faves?add=http://gliffer.ru/articles/algoritmi--kak-ustroen-whirlpool/" class="technorati" title="Share this on Technorati"><span>Technorati Favorites</span></a>
+    </ul>
+   </div>
+   <!-- /socialize -->
+
+  
+  
+  
+  
+ </div>
+
+ 
+</div>
+
+
+
+    </div>
+    <!-- /primary content -->
+
+
+
+   </div>
+  </div>
+  <!-- /main content -->
+
+  <div id="footer">
+		<div id="footer">
+  <div id="copyright">
+     Copyright © 2009 <strong>Gliffer</strong>
+   <a class="rss-subscribe" href="http://gliffer.ru/rssfeeds.php" title="RSS-Потоки">RSS-Потоки</a> <a id="goTop" class="js-link">TOP</a> <br>
+   </div>
+</div>
+  </div>
+
+  </div>
+ </div>
+ <!-- /shadow -->
+
+  <!-- page controls -->
+ <div id="pageControls"><a href="javascript:void(0);" class="fontSize bubble" title="Increase or decrease text size"></a><a href="javascript:void(0);" class="pageWidth bubble" title="switch from fixed to fluid page width"></a></div>
+ <!-- /page controls -->
+
+ </div>
+
+ <script type="text/javascript">
+  /* <![CDATA[ */
+    var isIE6 = false; /* <- do not change! */
+    var isIE = false; /* <- do not change! */
+    var lightbox = 1; /* enable lightbox on all image links */
+  /* ]]> */
+ </script>
+ <!--[if lte IE 6]> <script type="text/javascript"> isIE6 = true; isIE = true; </script> <![endif]-->
+ <!--[if gte IE 7]> <script type="text/javascript"> isIE = true; </script> <![endif]-->
+
+ <script type="text/javascript" src="%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20_%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool%20_%20Gliffer_files/jquery_002.js"></script>
+ <script src="%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20_%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool%20_%20Gliffer_files/xmlhttp_total.js" type="text/javascript"></script> 
+ 
+
+
+<div style="float:right; padding: 5px;">
+<!--LiveInternet counter--><script type="text/javascript"><!--
+document.write("<a href='http://www.liveinternet.ru/click' "+
+"target=_blank><img src='http://counter.yadro.ru/hit?t26.2;r"+
+escape(document.referrer)+((typeof(screen)=="undefined")?"":
+";s"+screen.width+"*"+screen.height+"*"+(screen.colorDepth?
+screen.colorDepth:screen.pixelDepth))+";u"+escape(document.URL)+
+";"+Math.random()+
+"' alt='' title='LiveInternet: показано число посетителей за"+
+" сегодня' "+
+"border='0' width='88' height='15'></a>")
+//--></script><a href="http://www.liveinternet.ru/click" target="_blank"><img src="%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20_%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool%20_%20Gliffer_files/hit.gif" alt="" title="LiveInternet: показано число посетителей за сегодня" border="0" height="15" width="88"></a><!--/LiveInternet-->
+
+<!-- begin of Top100 code -->
+<script id="top100Counter" type="text/javascript" src="%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20_%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool%20_%20Gliffer_files/top100.js"></script><noscript><img src="http://counter.rambler.ru/top100.cnt?1979835" alt="" width="1" height="1" border="0"/></noscript>
+<!-- end of Top100 code -->
+<!-- begin of Top100 logo -->
+<a href="http://top100.rambler.ru/home?id=1979835" target="_blank"><img src="%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20_%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool%20_%20Gliffer_files/w2.gif" alt="Rambler's Top100" border="0" height="31" width="88"></a>
+<!-- end of Top100 logo -->
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script src="%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20_%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool%20_%20Gliffer_files/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-5660648-7");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+<!-- Yandex.Metrika -->
+<script src="%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B%20_%20%D0%9A%D0%B0%D0%BA%20%D1%83%D1%81%D1%82%D1%80%D0%BE%D0%B5%D0%BD%20Whirlpool%20_%20Gliffer_files/watch.js" type="text/javascript"></script>
+<script type="text/javascript">
+try { var yaCounter819148 = new Ya.Metrika(819148); } catch(e){}
+</script>
+<noscript><div style="position:absolute"><img src="http://mc.yandex.ru/watch/819148"  alt="" /></div></noscript>
+<!-- /Yandex.Metrika -->
+	
+
+
+
+</div><div id="fancyoverlay"></div><div id="fancywrap"><div class="fancyloading" id="fancyloading"><div></div></div><div id="fancyouter"><div id="fancyinner"><a href="javascript:;" id="fancyleft"><span class="fancyico" id="fancyleftico"></span></a><a href="javascript:;" id="fancyright"><span class="fancyico" id="fancyrightico"></span></a><div id="fancycontent"></div></div><div id="fancytitle"></div></div></div></body></html>
